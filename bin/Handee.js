@@ -59,15 +59,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.PressAndHold = undefined;
+	exports.Drag = exports.PressAndHold = undefined;
 
 	var _PressAndHold = __webpack_require__(1);
 
 	var _PressAndHold2 = _interopRequireDefault(_PressAndHold);
 
+	var _Drag = __webpack_require__(162);
+
+	var _Drag2 = _interopRequireDefault(_Drag);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	exports.PressAndHold = _PressAndHold2.default;
+	exports.Drag = _Drag2.default;
 
 /***/ },
 /* 1 */
@@ -127,6 +132,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function handleMouseDown(e, child) {
 	      var _this2 = this;
 
+	      e.stopPropagation();
+
 	      // keep a copy of the target
 	      var target = e.target;
 
@@ -144,11 +151,46 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'handleMouseUp',
 	    value: function handleMouseUp(e, child) {
+	      e.stopPropagation();
+
 	      // if the child has a handler defined for this event, call it
 	      if (child.props.onMouseUp) child.props.onMouseUp(e);
 
 	      // kill the hold timer we have running
 	      this.endTimer();
+	    }
+	  }, {
+	    key: 'handleTouchStart',
+	    value: function handleTouchStart(e, child) {
+	      // if the child has a handler defined for this event, call it
+	      if (child.props.onTouchStart) child.props.onTouchStart(e);
+
+	      // kill the event, and interpret it as a mouse event instead
+	      e.stopPropagation();
+	      e.preventDefault();
+	      this.handleMouseDown(e, child);
+	    }
+	  }, {
+	    key: 'handleTouchEnd',
+	    value: function handleTouchEnd(e, child) {
+	      // if the child has a handler defined for this event, call it
+	      if (child.props.onTouchEnd) child.props.onTouchEnd(e);
+
+	      // kill the event, and interpret it as a mouse event instead
+	      e.stopPropagation();
+	      e.preventDefault();
+	      this.handleMouseUp(e, child);
+	    }
+	  }, {
+	    key: 'handleTouchCancel',
+	    value: function handleTouchCancel(e, child) {
+	      // if the child has a handler defined for this event, call it
+	      if (child.props.onTouchCancel) child.props.onTouchCancel(e);
+
+	      // kill the event, and interpret it as a mouse event instead
+	      e.stopPropagation();
+	      e.preventDefault();
+	      this.handleMouseUp(e, child);
 	    }
 	  }, {
 	    key: 'runTimer',
@@ -195,6 +237,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        onMouseUp: function onMouseUp(e) {
 	          return _this4.handleMouseUp(e, child);
+	        },
+	        onTouchStart: function onTouchStart(e) {
+	          return _this4.handleTouchStart(e, child);
+	        },
+	        onTouchEnd: function onTouchEnd(e) {
+	          return _this4.handleTouchEnd(e, child);
+	        },
+	        onTouchCancel: function onTouchCancel(e) {
+	          return _this4.handleTouchCancel(e, child);
 	        }
 	      });
 	    }
@@ -19805,6 +19856,213 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = deprecated;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5)))
+
+/***/ },
+/* 159 */,
+/* 160 */,
+/* 161 */,
+/* 162 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var T = _react2.default.PropTypes;
+
+	var Drag = function (_React$Component) {
+	  _inherits(Drag, _React$Component);
+
+	  function Drag(props) {
+	    _classCallCheck(this, Drag);
+
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Drag).call(this, props));
+
+	    _this.handleMouseMove = function (e) {
+	      if (!_this.state.grabbed) return;
+	      e.stopPropagation();
+
+	      var _ref = e.touches && e.touches.length ? e.touches[0] : e;
+
+	      var clientX = _ref.clientX;
+	      var clientY = _ref.clientY;
+
+
+	      _this.setState({
+	        newX: _this.state.baseX + clientX - _this.state.startX,
+	        newY: _this.state.baseY + clientY - _this.state.startY
+	      });
+	    };
+
+	    _this.handleTouchMove = function (e) {
+	      // kill the event, and interpret it as a mouse event instead
+	      e.stopPropagation();
+	      e.preventDefault();
+	      _this.handleMouseMove(e);
+	    };
+
+	    if (typeof props.children !== 'function') {
+	      throw new Error('Children of Drag must be a function');
+	    }
+
+	    _this.state = {
+	      grabbed: false,
+	      baseX: props.start.x,
+	      baseY: props.start.y,
+	      startX: 0,
+	      startY: 0,
+	      newX: props.start.x,
+	      newY: props.start.y
+	    };
+	    return _this;
+	  }
+
+	  _createClass(Drag, [{
+	    key: 'shouldComponentUpdate',
+	    value: function shouldComponentUpdate(nextProps, nextState) {
+	      if (nextProps !== this.props) return true;
+	      return nextState.newX !== this.state.newX || nextState.newY !== this.state.newY;
+	    }
+	  }, {
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      document.addEventListener('mousemove', this.handleMouseMove);
+	      document.addEventListener('touchmove', this.handleMouseMove);
+	    }
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      document.removeEventListener('mousemove', this.handleMouseMove);
+	      document.removeEventListener('touchmove', this.handleMouseMove);
+	    }
+	  }, {
+	    key: 'handleMouseDown',
+	    value: function handleMouseDown(event, child) {
+	      event.stopPropagation();
+
+	      // if the child has a handler defined for this event, call it
+	      if (child.props.onMouseDown) child.props.onMouseDown(e);
+	      var e = event.nativeEvent;
+
+	      var _ref2 = e.touches && e.touches.length ? e.touches[0] : e;
+
+	      var clientX = _ref2.clientX;
+	      var clientY = _ref2.clientY;
+
+
+	      this.setState({
+	        grabbed: true,
+	        startX: clientX,
+	        startY: clientY
+	      });
+	    }
+	  }, {
+	    key: 'handleMouseUp',
+	    value: function handleMouseUp(e, child) {
+	      e.stopPropagation();
+
+	      // if the child has a handler defined for this event, call it
+	      if (child.props.onMouseUp) child.props.onMouseUp(e);
+
+	      this.setState({
+	        grabbed: false,
+	        startX: 0,
+	        startY: 0,
+	        baseX: this.state.newX,
+	        baseY: this.state.newY
+	      });
+	    }
+	  }, {
+	    key: 'handleTouchStart',
+	    value: function handleTouchStart(e, child) {
+	      // if the child has a handler defined for this event, call it
+	      if (child.props.onTouchStart) child.props.onTouchStart(e);
+
+	      // kill the event, and interpret it as a mouse event instead
+	      e.stopPropagation();
+	      e.preventDefault();
+	      this.handleMouseDown(e, child);
+	    }
+	  }, {
+	    key: 'handleTouchEnd',
+	    value: function handleTouchEnd(e, child) {
+	      // if the child has a handler defined for this event, call it
+	      if (child.props.onTouchEnd) child.props.onTouchEnd(e);
+
+	      // kill the event, and interpret it as a mouse event instead
+	      e.stopPropagation();
+	      e.preventDefault();
+	      this.handleMouseUp(e, child);
+	    }
+	  }, {
+	    key: 'handleTouchCancel',
+	    value: function handleTouchCancel(e, child) {
+	      // if the child has a handler defined for this event, call it
+	      if (child.props.onTouchCancel) child.props.onTouchCancel(e);
+
+	      // kill the event, and interpret it as a mouse event instead
+	      e.stopPropagation();
+	      e.preventDefault();
+	      this.handleMouseUp(e, child);
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _this2 = this;
+
+	      var children = this.props.children;
+	      var _state = this.state;
+	      var newX = _state.newX;
+	      var newY = _state.newY;
+
+	      var child = children(newX, newY);
+
+	      // instead of wrapping the child in a DOM element, clone the child and
+	      // return the close instead, but with its props merged with our callbacks
+	      return _react2.default.cloneElement(_react2.default.Children.only(child), {
+	        onMouseDown: function onMouseDown(e) {
+	          return _this2.handleMouseDown(e, child);
+	        },
+	        onMouseUp: function onMouseUp(e) {
+	          return _this2.handleMouseUp(e, child);
+	        },
+	        onTouchStart: function onTouchStart(e) {
+	          return _this2.handleTouchStart(e, child);
+	        },
+	        onTouchEnd: function onTouchEnd(e) {
+	          return _this2.handleTouchEnd(e, child);
+	        },
+	        onTouchCancel: function onTouchCancel(e) {
+	          return _this2.handleTouchCancel(e, child);
+	        }
+	      });
+	    }
+	  }]);
+
+	  return Drag;
+	}(_react2.default.Component);
+
+	Drag.propTypes = {
+	  children: T.func.isRequired,
+	  start: T.object.isRequired
+	};
+	exports.default = Drag;
 
 /***/ }
 /******/ ])

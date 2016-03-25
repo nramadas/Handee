@@ -1,6 +1,7 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { PressAndHold } from '../bin/Handee';
+import React              from 'react';
+import ReactDOM           from 'react-dom';
+import { PressAndHold,
+         Drag           } from '../bin/Handee';
 
 const STYLE = {
   container: {
@@ -23,13 +24,24 @@ const STYLE = {
     cursor: 'pointer',
     margin: 20,
   },
+
+  dragger: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    width: 200,
+    height: 200,
+    border: `2px solid green`,
+    backgroundColor: 'white',
+    cursor: 'pointer',
+  },
 };
 
 const Tester = props => (
   <div style={STYLE.container}>
     <PressAndHold
       duration={ 250 }
-      onHoldComplete={t => console.log('Hold 1 complete', t)}
+      onHoldComplete={t => alert('Hold 1 complete', t)}
     >
       <div style={STYLE.button}/>
     </PressAndHold>
@@ -48,6 +60,20 @@ const Tester = props => (
         />
       )}
     </PressAndHold>
+
+    <Drag start={{x: 20, y: 20}}>
+      {(x, y) => {
+        return (
+          <div
+            style={{
+              ...STYLE.dragger,
+              top: y,
+              left: x,
+            }}
+          />
+        )
+      }}
+    </Drag>
   </div>
 );
 
